@@ -12,6 +12,6 @@
 # Design
 This will show the design process for the 3D shell. The shell will be created In SolidWorks. The thought is that it will have a Desktop PC like structure.
 <div align="center">
-    <img src="Images/Design Part 1.png" alt="drawing" width="20%"/>
+    <img src="Images/Design Part 1.png" alt="drawing" width="30%"/>
     <div> Figure 1: Starting Design Concept </div>
 </div>
