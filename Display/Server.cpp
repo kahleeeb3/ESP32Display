@@ -1,9 +1,6 @@
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <WiFiAP.h>
-#include "ServerInfo.h"
+#include "Server.h"
 
-WiFiServer server(TCP_PORT);  // start the server
+WiFiServer server(TCP_PORT);  // define server
 
 String getPublicIP() {
   WiFiClient client;
@@ -21,33 +18,27 @@ String getPublicIP() {
   return "None";
 }
 
-
-void setup() {
-  Serial.begin(9600);
+void initServer(){
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
-    Serial.println("Connecting to WiFi...");
+    Serial.println("\nConnecting to WiFi...");
+    displayText("Connecting to WiFi...");
   }
   
-  Serial.println("Connected!");
-  Serial.println("======================");
-  Serial.print("Network: ");
-  Serial.println(WiFi.SSID());
-  Serial.print("MAC Address: ");
-  Serial.println(WiFi.macAddress());
-  Serial.print("Private IP Address: ");
-  Serial.println(WiFi.localIP());
-  Serial.print("Public IP Address: ");
-  Serial.println(getPublicIP());
-  Serial.print("Port: ");
-  Serial.println(TCP_PORT);
+  char connectedString[100]; // array to store network data
+  sprintf(connectedString, "Connected!\n%s\n%s\n%s\n%s\n%d", 
+    WiFi.SSID(), WiFi.localIP().toString().c_str(), WiFi.macAddress().c_str(), getPublicIP(), TCP_PORT
+  );
+  displayText(connectedString);
+  
+  Serial.println(connectedString);
   
   server.begin();
 }
 
-void loop() {
+void getData(){
   WiFiClient client = server.available();
   if (client) {
     // Serial.println("New client connected");
