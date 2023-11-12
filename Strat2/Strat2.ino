@@ -44,6 +44,21 @@ String form = "<h1>Image Resizer</h1>"
 
 String html = "<html><body>" + form + "</body></html>";
 
+String getPublicIP() {
+  WiFiClient client;
+  if (client.connect("api64.ipify.org", 80)) {
+    client.println("GET /?format=text HTTP/1.0");
+    client.println("Host: api64.ipify.org");
+    client.println();
+    while (client.connected() && !client.find("\r\n\r\n")) {
+      // Wait for the response headers
+    }
+    // Read and parse the response
+    String response = client.readStringUntil('\r');
+    return response;
+  }
+  return "None";
+}
 
 void handleRoot() {
   server.send(200, "text/html", html);
@@ -59,6 +74,7 @@ void handleFormSubmit() {
 
   // Display the message on the external display
   displayText(message.c_str());
+  Serial.println(message);
 }
 
 void handleNotFound() {
@@ -91,7 +107,12 @@ void initServer() {
   Serial.println(ssid);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-  displayText(WiFi.localIP().toString().c_str());
+
+  char connectedString[100]; // array to store network data
+  sprintf(connectedString, "Connected!\n%s\n%s:%d\n", 
+    WiFi.localIP().toString().c_str(), getPublicIP().c_str(),TCP_PORT
+  );
+  displayText(connectedString);
 
   if (MDNS.begin("esp32")) {
     Serial.println("MDNS responder started");
