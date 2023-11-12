@@ -10,13 +10,40 @@ const char* password = WIFI_PASSWORD;
 
 WebServer server(80);
 
-String form = "<h1>Hello from ESP32!</h1>"
+String form = "<h1>Image Resizer</h1>"
               "<form action='/submit' method='post'>"
               "Message: <input type='text' name='message'><br>"
               "<input type='submit' value='Submit'>"
-              "</form>";
+              "</form>"
+              "<form id='upload-form'>"
+              "Select Image: <input type='file' id='image-input' accept='image/*'><br>"
+              "<input type='button' value='Submit' onclick='resizeAndDisplay()'>"
+              "</form>"
+              "<canvas id='resized-canvas' width='128' height='64' style='display:none;'></canvas>"
+              "<img id='resized-image' style='display:none;'>"
+              "<script>"
+              "function resizeAndDisplay() {"
+              "  var input = document.getElementById('image-input');"
+              "  var canvas = document.getElementById('resized-canvas');"
+              "  var ctx = canvas.getContext('2d');"
+              "  var img = new Image();"
+              "  img.onload = function() {"
+              "    ctx.drawImage(img, 0, 0, 128, 64);"
+              "    var resizedImage = document.getElementById('resized-image');"
+              "    resizedImage.src = canvas.toDataURL('image/jpeg', 0.8);"
+              "    resizedImage.style.display = 'block';"
+              "  };"
+              "  var file = input.files[0];"
+              "  var reader = new FileReader();"
+              "  reader.onload = function(e) {"
+              "    img.src = e.target.result;"
+              "  };"
+              "  reader.readAsDataURL(file);"
+              "}"
+              "</script>";
 
-String html = "<html><body>" + form + "<p id='submission'></p></body></html>";
+String html = "<html><body>" + form + "</body></html>";
+
 
 void handleRoot() {
   server.send(200, "text/html", html);
