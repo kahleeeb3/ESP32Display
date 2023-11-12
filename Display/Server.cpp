@@ -28,8 +28,8 @@ void initServer(){
   }
   
   char connectedString[100]; // array to store network data
-  sprintf(connectedString, "Connected!\n%s\n%s\n%s\n%s\n%d", 
-    WiFi.SSID(), WiFi.localIP().toString().c_str(), WiFi.macAddress().c_str(), getPublicIP(), TCP_PORT
+  sprintf(connectedString, "Connected!\n%s\n%s\n%s\n%d", 
+    WiFi.SSID(), WiFi.localIP().toString().c_str(), WiFi.macAddress().c_str(), TCP_PORT
   );
   displayText(connectedString);
   
@@ -45,11 +45,12 @@ void getData(){
     while (client.connected()) {
       if (client.available()) {
         String data = client.readStringUntil('\r');
-        Serial.print("Received data: ");
+        // Serial.print("Received data: ");
         Serial.println(data);
+        displayText(data.c_str());
       }
     }
     client.stop();
-    Serial.println("Client disconnected");
+    // Serial.println("Client disconnected");
   }
 }

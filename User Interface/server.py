@@ -11,5 +11,3 @@ def sendData(data):
     sock.sendall(data.encode())
     sock.close()
 
-sendData("testing some data")
-
