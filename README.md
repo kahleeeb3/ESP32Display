@@ -34,3 +34,17 @@ Create the following `ServerInfo.h` file
 
 #endif
 ```
+
+## New Idea
+The old idea was to have python handle everything but I think it would be more user friendly to create a
+HTML server and have user communicate over that.
+
+1. Try to connect to internet with provided SSID, Password
+    - If user presses button before network connects, create your own web-server
+    - `Scan` button allows them to search available network and select one
+    - `Password` can be provided by the user
+    - Attempt to connect again.
+    - If success kill own network
+
+2. Once connection success, allow user to submit some text
+    - send text over socket

@@ -1,3 +1,5 @@
 GUI/__pycache__
-GUI/serverInfo.py
-Display/serverInfo.h
+
+# remove any file with these names regardless of path
+**/serverInfo.py
+**/serverInfo.h
