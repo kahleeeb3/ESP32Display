@@ -27,7 +27,7 @@ String html = "<head>\n"
               "        <input type='button' value='Update Image' onclick='resizeAndDisplay()'>\n"
               "        <input type='button' value='Send Image' onclick='sendImage()'>\n"
               "        <br>\n"
-              "        Threshold: <input type='range' id='threshold-slider' min='0' max='255' value='115' oninput='updateThresholdValue()'>\n"
+              "        Threshold: <input type='range' id='threshold-slider' min='0' max='255' value='115' oninput='updateThresholdValue()'>\n"   
               "        <span id='threshold-value'>115</span>\n"
               "    </form>\n"
               "    <script>\n"
@@ -85,25 +85,28 @@ String html = "<head>\n"
               "            var canvas = document.getElementById('resized-canvas');\n"
               "            var ctx = canvas.getContext('2d');\n"
               "            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;\n"
-              "            // Convert image data to a bitmap string\n"
-              "            var bitmapString = '';\n"
-              "            for (var i = 0; i < imageData.length; i += 4) {\n"
-              "                var brightness = (imageData[i] + imageData[i + 1] + imageData[i + 2]) / 3;\n"
-              "                bitmapString += brightness > 128 ? '1' : '0';\n"
+              "            // Convert image data to a binary string\n"
+              "            var binaryString = \"\";\n"
+              "            for (var i = 0; i < imageData.length; i += 1) {\n"
+              "                if (imageData[i] == 255){\n"
+              "                    binaryString += \"1\";\n"
+              "                }\n"
+              "                else{\n"
+              "                    binaryString += \"0\";\n"
+              "                }\n"
               "            }\n"
-              "            // Break into 8-bit chunks\n"
-              "            var binaryChunks = [];\n"
-              "            for (var i = 0; i < bitmapString.length; i += 8) {\n"
-              "                binaryChunks.push(bitmapString.slice(i, i + 8));\n"
-              "            }\n"
-              "            // Convert chunks to strings\n"
-              "            var binaryStrings = binaryChunks.map(chunk => chunk);\n"
-              "            // Convert each section to a byte\n"
-              "            var byteValues = binaryStrings.map(binaryString => parseInt(binaryString, 2));\n"
-              "            // Log the byte data (you may want to send it to the server)\n"
-              "            console.log('Byte Data:', byteValues);\n"
-              "            // Store the byte data globally if needed\n"
-              "            // window.byteData = byteValues;\n"
+              "            console.log(binaryString.length);\n"
+              "            // send the string to the server\n"
+              "            var form = document.createElement(\"form\");\n"
+              "            form.method = \"POST\";\n"
+              "            form.action = \"/submitPhoto\";\n"
+              "            var input = document.createElement(\"input\");\n"
+              "            input.type = \"hidden\";\n"
+              "            input.name = \"message\";\n"
+              "            input.value = binaryString;\n"
+              "            form.appendChild(input);\n"
+              "            document.body.appendChild(form);\n"
+              "            form.submit();\n"
               "        }\n"
               "    </script>\n"
               "</body>\n";
@@ -128,10 +131,49 @@ void handleRoot() {
   server.send(200, "text/html", html);
 }
 
+void handlePhoto() {
+  uint8_t data[1024]; // Array to store incoming bytes
+  String str = server.arg("message");
+  int length = str.length();
+  Serial.println(length);
+
+/*
+  int byteIndex = 0;
+
+  // Ensure the length is a multiple of 8
+  if (length % 8 != 0) {
+    Serial.println("Error: Input string length is not a multiple of 8.");
+    return;
+  }
+
+  // Ensure data array size is not exceeded
+  if (length / 8 > sizeof(data)) {
+    Serial.println("Error: Input string too long for data array.");
+    Serial.println(length);
+    return;
+  }
+
+  for (int i = 0; i < length; i += 8) {
+    byte currentByte = 0;
+
+    for (int j = 0; j < 8; j++) {
+      char bit = str[i + j];
+      currentByte |= (bit - '0') << (7 - j);
+    }
+
+    data[byteIndex++] = currentByte;
+  }
+
+  // Print the filled portion of the byte array
+  for (int i = 0; i < byteIndex; i++) {
+    Serial.print((int)data[i]);
+    Serial.print(" ");
+  }
+  */
+}
+
 void handleFormSubmit() {
   String message = server.arg("message");
-
-  // Update the HTML content to include the user's submission
   String updatedHtml = html;
   updatedHtml.replace(html, html + "<p>Submission: " + message + "</p>");
   server.send(200, "text/html", updatedHtml);
@@ -184,6 +226,7 @@ void initServer() {
 
   server.on("/", handleRoot);
   server.on("/submit", HTTP_POST, handleFormSubmit);
+  server.on("/submitPhoto", HTTP_POST, handlePhoto);
   server.onNotFound(handleNotFound);
 
   server.begin();

@@ -73,25 +73,28 @@
             var canvas = document.getElementById('resized-canvas');
             var ctx = canvas.getContext('2d');
             var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-            // Convert image data to a bitmap string
-            var bitmapString = '';
-            for (var i = 0; i < imageData.length; i += 4) {
-                var brightness = (imageData[i] + imageData[i + 1] + imageData[i + 2]) / 3;
-                bitmapString += brightness > 128 ? '1' : '0';
+            // Convert image data to a binary string
+            var binaryString = "";
+            for (var i = 0; i < imageData.length; i += 1) {
+                if (imageData[i] == 255){
+                    binaryString += 1;
+                }
+                else{
+                    binaryString += 0;
+                }
             }
-            // Break into 8-bit chunks
-            var binaryChunks = [];
-            for (var i = 0; i < bitmapString.length; i += 8) {
-                binaryChunks.push(bitmapString.slice(i, i + 8));
-            }
-            // Convert chunks to strings
-            var binaryStrings = binaryChunks.map(chunk => chunk);
-            // Convert each section to a byte
-            var byteValues = binaryStrings.map(binaryString => parseInt(binaryString, 2));
-            // Log the byte data (you may want to send it to the server)
-            console.log('Byte Data:', byteValues);
-            // Store the byte data globally if needed
-            // window.byteData = byteValues;
+            // console.log(binaryString);
+            // send the string to the server
+            var form = document.createElement("form");
+            form.method = "POST";
+            form.action = "/submitPhoto";
+            var input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "message";
+            input.value = binaryString;
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
         }
     </script>            
 </body>
