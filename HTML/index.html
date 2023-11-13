@@ -93,8 +93,23 @@
                 bitmapString += brightness > 128 ? '1' : '0';
             }
 
-            // Log the bitmap string (you may want to send it to the server)
-            console.log('Bitmap String:', bitmapString);
+            // Break into 8-bit chunks
+            var binaryChunks = [];
+            for (var i = 0; i < bitmapString.length; i += 8) {
+                binaryChunks.push(bitmapString.slice(i, i + 8));
+            }
+
+            // Convert chunks to strings
+            var binaryStrings = binaryChunks.map(chunk => chunk);
+
+            // Convert each section to a byte
+            var byteValues = binaryStrings.map(binaryString => parseInt(binaryString, 2));
+
+            // Log the byte data (you may want to send it to the server)
+            console.log('Byte Data:', byteValues);
+
+            // Store the byte data globally if needed
+            // window.byteData = byteValues;
         }
     </script>            
 </body>
