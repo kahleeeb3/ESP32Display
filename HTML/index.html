@@ -1,8 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESP32 Display Messenger</title>
 </head>
 <body>
@@ -30,11 +26,9 @@
             var img = new Image();
             var thresholdSlider = document.getElementById('threshold-slider');
             var thresholdValueSpan = document.getElementById('threshold-value');
-
             img.onload = function() {
                 // Resize the image
                 ctx.drawImage(img, 0, 0, 128, 64);
-
                 // Convert the image to greyscale
                 var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 var data = imageData.data;
@@ -45,13 +39,11 @@
                     data[i + 2] = avg;
                 }
                 ctx.putImageData(imageData, 0, 0);
-
                 // Apply threshold
                 imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 data = imageData.data;
                 var threshold = thresholdSlider.value;
                 thresholdValueSpan.innerText = threshold;
-
                 for (var i = 0; i < data.length; i += 4) {
                     var brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
                     var newValue = brightness > threshold ? 255 : 0;
@@ -60,13 +52,11 @@
                     data[i + 2] = newValue;
                 }
                 ctx.putImageData(imageData, 0, 0);
-
                 // Convert to monochrome
                 var thresholdedImage = document.getElementById('resized-image');
                 thresholdedImage.src = canvas.toDataURL('image/png');
                 thresholdedImage.style.display = 'block';
             };
-
             var file = input.files[0];
             var reader = new FileReader();
             reader.onload = function(e) {
@@ -74,43 +64,34 @@
             };
             reader.readAsDataURL(file);
         }
-
         function updateThresholdValue() {
             var thresholdSlider = document.getElementById('threshold-slider');
             var thresholdValueSpan = document.getElementById('threshold-value');
             thresholdValueSpan.innerText = thresholdSlider.value;
         }
-
         function sendImage() {
             var canvas = document.getElementById('resized-canvas');
             var ctx = canvas.getContext('2d');
             var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-
             // Convert image data to a bitmap string
             var bitmapString = '';
             for (var i = 0; i < imageData.length; i += 4) {
                 var brightness = (imageData[i] + imageData[i + 1] + imageData[i + 2]) / 3;
                 bitmapString += brightness > 128 ? '1' : '0';
             }
-
             // Break into 8-bit chunks
             var binaryChunks = [];
             for (var i = 0; i < bitmapString.length; i += 8) {
                 binaryChunks.push(bitmapString.slice(i, i + 8));
             }
-
             // Convert chunks to strings
             var binaryStrings = binaryChunks.map(chunk => chunk);
-
             // Convert each section to a byte
             var byteValues = binaryStrings.map(binaryString => parseInt(binaryString, 2));
-
             // Log the byte data (you may want to send it to the server)
             console.log('Byte Data:', byteValues);
-
             // Store the byte data globally if needed
             // window.byteData = byteValues;
         }
     </script>            
 </body>
-</html>
