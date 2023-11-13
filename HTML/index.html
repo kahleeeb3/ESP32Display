@@ -3,32 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Resizer</title>
+    <title>ESP32 Display Messenger</title>
 </head>
 <body>
-    <h1>Image Resizer</h1>
+    <h1>Message Submission</h1>
     <form action='/submit' method='post'>
-        Message: <input type='text' name='message'><br>
-        <input type='submit' value='Submit'>
+        Message: <input type='text' name='message'>
+        <input type='submit' value='Send'>
     </form>
-    <form id='upload-form'>
-        Select Image: <input type='file' id='image-input' accept='image/*'><br>
-        <input type='button' value='Submit' onclick='resizeAndDisplay()'>
-    </form>
+    <h1>Image Resizer</h1>
     <canvas id='resized-canvas' width='128' height='64' style='display:none;'></canvas>
     <img id='resized-image' style='display:none;'>
+    <form id='upload-form'>
+        Select Image: <input type='file' id='image-input' accept='image/*'>
+        <input type='button' value='Update Image' onclick='resizeAndDisplay()'>
+        <br>
+        Threshold: <input type='range' id='threshold-slider' min='0' max='255' value='115' oninput='updateThresholdValue()'>
+        <span id='threshold-value'>115</span>
+    </form>
     <script>
         function resizeAndDisplay() {
             var input = document.getElementById('image-input');
             var canvas = document.getElementById('resized-canvas');
             var ctx = canvas.getContext('2d');
             var img = new Image();
+            var thresholdSlider = document.getElementById('threshold-slider');
+            var thresholdValueSpan = document.getElementById('threshold-value');
+
             img.onload = function() {
+                // Resize the image
                 ctx.drawImage(img, 0, 0, 128, 64);
-                var resizedImage = document.getElementById('resized-image');
-                resizedImage.src = canvas.toDataURL('image/jpeg', 0.8);
-                resizedImage.style.display = 'block';
+
+                // Convert the image to greyscale
+                var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                var data = imageData.data;
+                for (var i = 0; i < data.length; i += 4) {
+                    var avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                    data[i] = avg;
+                    data[i + 1] = avg;
+                    data[i + 2] = avg;
+                }
+                ctx.putImageData(imageData, 0, 0);
+
+                // Apply threshold
+                imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                data = imageData.data;
+                var threshold = thresholdSlider.value;
+                thresholdValueSpan.innerText = threshold;
+
+                for (var i = 0; i < data.length; i += 4) {
+                    var brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                    var newValue = brightness > threshold ? 255 : 0;
+                    data[i] = newValue;
+                    data[i + 1] = newValue;
+                    data[i + 2] = newValue;
+                }
+                ctx.putImageData(imageData, 0, 0);
+
+                // Convert to monochrome
+                var thresholdedImage = document.getElementById('resized-image');
+                thresholdedImage.src = canvas.toDataURL('image/png');
+                thresholdedImage.style.display = 'block';
             };
+
             var file = input.files[0];
             var reader = new FileReader();
             reader.onload = function(e) {
@@ -36,6 +73,12 @@
             };
             reader.readAsDataURL(file);
         }
-    </script>
+
+        function updateThresholdValue() {
+            var thresholdSlider = document.getElementById('threshold-slider');
+            var thresholdValueSpan = document.getElementById('threshold-value');
+            thresholdValueSpan.innerText = thresholdSlider.value;
+        }
+    </script>            
 </body>
 </html>
