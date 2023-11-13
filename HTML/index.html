@@ -17,6 +17,7 @@
     <form id='upload-form'>
         Select Image: <input type='file' id='image-input' accept='image/*'>
         <input type='button' value='Update Image' onclick='resizeAndDisplay()'>
+        <input type='button' value='Send Image' onclick='sendImage()'>
         <br>
         Threshold: <input type='range' id='threshold-slider' min='0' max='255' value='115' oninput='updateThresholdValue()'>
         <span id='threshold-value'>115</span>
@@ -78,6 +79,22 @@
             var thresholdSlider = document.getElementById('threshold-slider');
             var thresholdValueSpan = document.getElementById('threshold-value');
             thresholdValueSpan.innerText = thresholdSlider.value;
+        }
+
+        function sendImage() {
+            var canvas = document.getElementById('resized-canvas');
+            var ctx = canvas.getContext('2d');
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+            // Convert image data to a bitmap string
+            var bitmapString = '';
+            for (var i = 0; i < imageData.length; i += 4) {
+                var brightness = (imageData[i] + imageData[i + 1] + imageData[i + 2]) / 3;
+                bitmapString += brightness > 128 ? '1' : '0';
+            }
+
+            // Log the bitmap string (you may want to send it to the server)
+            console.log('Bitmap String:', bitmapString);
         }
     </script>            
 </body>
