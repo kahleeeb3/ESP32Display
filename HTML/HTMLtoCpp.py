@@ -1,10 +1,11 @@
-# Function to read and print each line of a file
 def print_file_lines(file_path):
     try:
         with open(file_path, 'r') as file:
             for line in file:
-                # Print the line with leading whitespace and "\n"
-                print(f'"{line.rstrip()}\\n"')
+                # Replace double quotes with escaped double quotes
+                modified_line = line.replace('"', '\\"')
+                # Print the modified line with leading whitespace and "\n"
+                print(f'"{modified_line.rstrip()}\\n"')
     except FileNotFoundError:
         print(f"Error: File not found - {file_path}")
     except Exception as e:
