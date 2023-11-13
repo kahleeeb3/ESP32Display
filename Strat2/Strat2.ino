@@ -85,17 +85,13 @@ String html = "<head>\n"
               "            var canvas = document.getElementById('resized-canvas');\n"
               "            var ctx = canvas.getContext('2d');\n"
               "            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;\n"
-              "            // Convert image data to a binary string\n"
-              "            var binaryString = \"\";\n"
-              "            for (var i = 0; i < imageData.length; i += 1) {\n"
-              "                if (imageData[i] == 255){\n"
-              "                    binaryString += \"1\";\n"
-              "                }\n"
-              "                else{\n"
-              "                    binaryString += \"0\";\n"
-              "                }\n"
+              "            // Convert image data to a bitmap string\n"
+              "            var bitmapString = '';\n"
+              "            for (var i = 0; i < imageData.length; i += 4) {\n"
+              "                var brightness = (imageData[i] + imageData[i + 1] + imageData[i + 2]) / 3;\n"
+              "                bitmapString += brightness > 128 ? '1' : '0';\n"
               "            }\n"
-              "            console.log(binaryString.length);\n"
+              "            // console.log(bitmapString.length);\n"
               "            // send the string to the server\n"
               "            var form = document.createElement(\"form\");\n"
               "            form.method = \"POST\";\n"
@@ -103,7 +99,7 @@ String html = "<head>\n"
               "            var input = document.createElement(\"input\");\n"
               "            input.type = \"hidden\";\n"
               "            input.name = \"message\";\n"
-              "            input.value = binaryString;\n"
+              "            input.value = bitmapString;\n"
               "            form.appendChild(input);\n"
               "            document.body.appendChild(form);\n"
               "            form.submit();\n"
@@ -135,9 +131,7 @@ void handlePhoto() {
   uint8_t data[1024]; // Array to store incoming bytes
   String str = server.arg("message");
   int length = str.length();
-  Serial.println(length);
 
-/*
   int byteIndex = 0;
 
   // Ensure the length is a multiple of 8
@@ -165,11 +159,19 @@ void handlePhoto() {
   }
 
   // Print the filled portion of the byte array
-  for (int i = 0; i < byteIndex; i++) {
-    Serial.print((int)data[i]);
-    Serial.print(" ");
-  }
-  */
+  // for (int i = 0; i < byteIndex; i++) {
+  //   Serial.print((int)data[i]);
+  //   Serial.print(" ");
+  // }
+
+  displayBitmap(data); // display image
+
+  String message = "Sent photo successfuly.";
+  String updatedHtml = html;
+  updatedHtml.replace(html, html + "<p>Submission: " + message + "</p>");
+  server.send(200, "text/html", updatedHtml);
+  // server.send(200, "text/plain", "Data successfully processed.");
+
 }
 
 void handleFormSubmit() {

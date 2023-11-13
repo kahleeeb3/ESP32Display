@@ -73,17 +73,13 @@
             var canvas = document.getElementById('resized-canvas');
             var ctx = canvas.getContext('2d');
             var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-            // Convert image data to a binary string
-            var binaryString = "";
-            for (var i = 0; i < imageData.length; i += 1) {
-                if (imageData[i] == 255){
-                    binaryString += 1;
-                }
-                else{
-                    binaryString += 0;
-                }
+            // Convert image data to a bitmap string
+            var bitmapString = '';
+            for (var i = 0; i < imageData.length; i += 4) {
+                var brightness = (imageData[i] + imageData[i + 1] + imageData[i + 2]) / 3;
+                bitmapString += brightness > 128 ? '1' : '0';
             }
-            // console.log(binaryString);
+            // console.log(bitmapString.length);
             // send the string to the server
             var form = document.createElement("form");
             form.method = "POST";
@@ -91,7 +87,7 @@
             var input = document.createElement("input");
             input.type = "hidden";
             input.name = "message";
-            input.value = binaryString;
+            input.value = bitmapString;
             form.appendChild(input);
             document.body.appendChild(form);
             form.submit();
